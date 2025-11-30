@@ -1,0 +1,8 @@
+---
+# Ansible Galaxy requirements for KYPO training
+
+roles:
+  - name: kypo-user-access
+    src: https://gitlab.ics.muni.cz/muni-kypo-crp/devops/kypo-user-access.git
+    scm: git
+    version: master

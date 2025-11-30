@@ -1,0 +1,76 @@
+---
+# Web server configuration
+
+- name: Install Apache and PHP
+  apt:
+    name:
+      - apache2
+      - php
+      - php-mysql
+    state: present
+
+- name: Start Apache
+  service:
+    name: apache2
+    state: started
+    enabled: yes
+
+- name: Create login page
+  copy:
+    dest: /var/www/html/login.php
+    content: |
+      <?php
+      $valid_user = 'admin';
+      $valid_pass = 'admin';
+      
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+          $username = $_POST['username'] ?? '';
+          $password = $_POST['password'] ?? '';
+          
+          if ($username === $valid_user && $password === $valid_pass) {
+              echo '<h1>Welcome Admin!</h1>';
+              echo '<p>Database server: 192.168.2.20</p>';
+              echo '<p>DB User: dbadmin / DB Pass: secret123</p>';
+          } else {
+              echo '<p style="color:red">Invalid credentials</p>';
+          }
+      }
+      ?>
+      <html>
+      <body>
+      <h1>Corporate Login</h1>
+      <form method="post">
+          <input type="text" name="username" placeholder="Username"><br><br>
+          <input type="password" name="password" placeholder="Password"><br><br>
+          <input type="submit" value="Login">
+      </form>
+      </body>
+      </html>
+    mode: '0644'
+
+- name: Create config file with db credentials
+  copy:
+    dest: /var/www/html/config.php
+    content: |
+      <?php
+      // Database Configuration - SENSITIVE
+      $db_host = '192.168.2.20';
+      $db_user = 'dbadmin';
+      $db_pass = 'secret123';
+      $db_name = 'corporate';
+      ?>
+    mode: '0644'
+
+- name: Create index page
+  copy:
+    dest: /var/www/html/index.html
+    content: |
+      <!DOCTYPE html>
+      <html>
+      <head><title>Corporate Portal</title></head>
+      <body>
+      <h1>Welcome to Corporate Portal</h1>
+      <p><a href="/login.php">Employee Login</a></p>
+      </body>
+      </html>
+    mode: '0644'

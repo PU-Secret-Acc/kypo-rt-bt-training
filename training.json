@@ -1,0 +1,121 @@
+{
+  "title": "Red Team vs Blue Team: Corporate Breach Exercise",
+  "description": "A competitive cybersecurity exercise simulating a real-world corporate network attack and defense scenario.",
+  "prerequisites": [
+    "Basic understanding of Linux command line",
+    "Familiarity with networking concepts (TCP/IP, ports)",
+    "Basic knowledge of web application security"
+  ],
+  "outcomes": [
+    "Practice offensive security techniques in a controlled environment",
+    "Develop defensive monitoring and detection skills",
+    "Understand attacker methodologies and defense strategies"
+  ],
+  "state": "UNRELEASED",
+  "show_stepper_bar": true,
+  "levels": [
+    {
+      "title": "Exercise Overview",
+      "level_type": "INFO_LEVEL",
+      "order": 0,
+      "estimated_duration": 5,
+      "content": "# Welcome to Red Team vs Blue Team\n\n## Scenario\nA corporate network is under attack. Red Team will attempt to breach the network, while Blue Team defends.\n\n## Teams\n- **Red Team**: Access the `attacker` machine (Kali Linux)\n- **Blue Team**: Monitor `soc-analyst`, defend `webserver`, `database`, and `firewall`\n\n## Objective\n- **Red Team**: Find and exfiltrate the secret flag from the database\n- **Blue Team**: Detect the attack and document evidence\n\n## Rules\n1. Stay within assigned network segments\n2. Document all actions taken\n3. Time limit: 60 minutes"
+    },
+    {
+      "title": "Red Team Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 1,
+      "estimated_duration": 2,
+      "passkey": "start-red",
+      "cloud_content": "# Red Team Workstation\n\nSSH into your Kali Linux attack box.\n\n## Your Mission\n1. Reconnaissance on target network\n2. Find vulnerabilities in the web server\n3. Pivot to the internal network\n4. Exfiltrate the flag from the database\n\n**Tip**: Check the `/opt/wordlists` directory for useful resources.",
+      "local_content": "Connect to: **attacker** (10.0.0.100)"
+    },
+    {
+      "title": "Blue Team Access",
+      "level_type": "ACCESS_LEVEL",
+      "order": 2,
+      "estimated_duration": 2,
+      "passkey": "start-blue",
+      "cloud_content": "# Blue Team SOC Workstation\n\nSSH into your SOC analyst machine.\n\n## Your Mission\n1. Monitor network traffic for suspicious activity\n2. Detect the red team's attack attempts\n3. Document all evidence of compromise\n4. Identify attack vectors used\n\n**Tip**: Check `/opt/monitoring` for helpful scripts.",
+      "local_content": "Connect to: **soc-analyst** (172.16.0.10)"
+    },
+    {
+      "title": "Phase 1: Reconnaissance",
+      "level_type": "TRAINING_LEVEL",
+      "order": 3,
+      "estimated_duration": 15,
+      "content": "# Phase 1: Reconnaissance\n\n## Red Team Tasks\n1. Scan the DMZ network (192.168.1.0/24)\n2. Identify running services on targets\n3. Note potential vulnerabilities\n\n## Blue Team Tasks\n1. Start monitoring with `tcpdump` on the firewall\n2. Watch for port scans\n3. Log any suspicious source IPs\n\n## Commands\n- **Red**: `nmap -sV 192.168.1.0/24`\n- **Blue**: `sudo tcpdump -i eth0 -n`",
+      "solution": "Web server on 192.168.1.10 has port 80 open",
+      "answer": "192.168.1.10"
+    },
+    {
+      "title": "Phase 2: Web Application Attack",
+      "level_type": "TRAINING_LEVEL",
+      "order": 4,
+      "estimated_duration": 15,
+      "content": "# Phase 2: Web Application Attack\n\n## Red Team Tasks\n1. Access the web application\n2. Find the login page\n3. Brute force credentials\n\n## Blue Team Tasks\n1. Monitor Apache access logs\n2. Look for brute force patterns\n3. Document the attack timeline\n\n## Commands\n- **Red**: `hydra -l admin -P /opt/wordlists/passwords.txt 192.168.1.10 http-post-form '/login.php:username=^USER^&password=^PASS^:Invalid'`\n- **Blue**: `tail -f /var/log/apache2/access.log`",
+      "solution": "Login credentials are admin:admin",
+      "answer": "admin"
+    },
+    {
+      "title": "Phase 3: Lateral Movement",
+      "level_type": "TRAINING_LEVEL",
+      "order": 5,
+      "estimated_duration": 15,
+      "content": "# Phase 3: Lateral Movement\n\n## Red Team Tasks\n1. After gaining web server access, find internal network details\n2. Discover database server\n3. Connect to the database\n\n## Blue Team Tasks\n1. Monitor for unusual outbound connections\n2. Check for privilege escalation attempts\n3. Look for lateral movement indicators\n\n## Hints\n- **Red**: Check `/var/www/html/config.php` for database credentials\n- **Blue**: Monitor connections between web server and internal network",
+      "solution": "Database connection string in config file reveals db_server:192.168.2.20",
+      "answer": "192.168.2.20"
+    },
+    {
+      "title": "Phase 4: Data Exfiltration",
+      "level_type": "TRAINING_LEVEL",
+      "order": 6,
+      "estimated_duration": 10,
+      "content": "# Phase 4: Data Exfiltration\n\n## Red Team Tasks\n1. Query the database for sensitive data\n2. Find and capture the flag\n3. Document your kill chain\n\n## Blue Team Tasks\n1. Detect database access from unusual sources\n2. Look for data exfiltration\n3. Prepare incident report\n\n## Final Goal\n- **Red**: Submit the flag you found\n- **Blue**: Submit your detection timeline",
+      "solution": "Connect to MySQL and query the secrets table",
+      "answer": "FLAG{blue_team_wins_with_detection}"
+    },
+    {
+      "title": "Exercise Debrief",
+      "level_type": "INFO_LEVEL",
+      "order": 7,
+      "estimated_duration": 10,
+      "content": "# Exercise Debrief\n\n## Red Team Review\n- What techniques worked?\n- What obstacles did you face?\n- How could you improve stealth?\n\n## Blue Team Review\n- What attacks did you detect?\n- What was missed?\n- How could detection be improved?\n\n## Key Takeaways\n1. Defense in depth is critical\n2. Logging and monitoring enable detection\n3. Strong credentials prevent easy wins\n4. Network segmentation limits lateral movement"
+    },
+    {
+      "title": "Assessment",
+      "level_type": "ASSESSMENT_LEVEL",
+      "order": 8,
+      "estimated_duration": 5,
+      "questions": [
+        {
+          "question_type": "FFQ",
+          "text": "What port was the web server running on?",
+          "answer_required": true,
+          "order": 0,
+          "points": 10,
+          "answer": "80",
+          "penalty": 0
+        },
+        {
+          "question_type": "FFQ",
+          "text": "What IP address hosted the database?",
+          "answer_required": true,
+          "order": 1,
+          "points": 10,
+          "answer": "192.168.2.20",
+          "penalty": 0
+        },
+        {
+          "question_type": "FFQ",
+          "text": "Enter the flag you captured",
+          "answer_required": true,
+          "order": 2,
+          "points": 30,
+          "answer": "FLAG{blue_team_wins_with_detection}",
+          "penalty": 5
+        }
+      ]
+    }
+  ]
+}

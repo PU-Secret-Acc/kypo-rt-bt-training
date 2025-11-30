@@ -1,0 +1,39 @@
+---
+# Red Team vs Blue Team Training - Provisioning Playbook
+
+- name: Configure all hosts with common settings
+  hosts: all
+  become: true
+  roles:
+    - kypo-user-access
+    - hosts
+
+- name: Configure attacker workstation
+  hosts: attacker
+  become: true
+  roles:
+    - attacker
+
+- name: Configure SOC analyst workstation
+  hosts: soc-analyst
+  become: true
+  roles:
+    - soc-analyst
+
+- name: Configure web server
+  hosts: webserver
+  become: true
+  roles:
+    - webserver
+
+- name: Configure database server
+  hosts: database
+  become: true
+  roles:
+    - database
+
+- name: Configure firewall/IDS
+  hosts: firewall
+  become: true
+  roles:
+    - firewall

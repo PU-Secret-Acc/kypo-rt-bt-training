@@ -1,0 +1,53 @@
+// Red Team vs Blue Team - Network Topology
+// Render with: dot -Tpng topology.dot -o topology.png
+
+digraph G {
+    rankdir=TB;
+    node [shape=box, style=filled];
+    
+    // Title
+    labelloc="t";
+    label="Red Team vs Blue Team Training Topology";
+    fontsize=20;
+    
+    // Networks as subgraphs
+    subgraph cluster_external {
+        label="External Network\n10.0.0.0/24";
+        style=filled;
+        color=lightcoral;
+        attacker [label="attacker\n10.0.0.100\n(Kali)", fillcolor=red, fontcolor=white];
+    }
+    
+    subgraph cluster_soc {
+        label="SOC Network\n172.16.0.0/24";
+        style=filled;
+        color=lightblue;
+        soc_analyst [label="soc-analyst\n172.16.0.10\n(Debian)", fillcolor=blue, fontcolor=white];
+    }
+    
+    subgraph cluster_dmz {
+        label="DMZ\n192.168.1.0/24";
+        style=filled;
+        color=lightyellow;
+        webserver [label="webserver\n192.168.1.10\n(Apache)", fillcolor=orange];
+        firewall [label="firewall\n192.168.1.254\n(IDS)", fillcolor=green, fontcolor=white];
+    }
+    
+    subgraph cluster_internal {
+        label="Internal Network\n192.168.2.0/24";
+        style=filled;
+        color=lightgreen;
+        database [label="database\n192.168.2.20\n(MariaDB)", fillcolor=purple, fontcolor=white];
+    }
+    
+    // Edge Router
+    edge_router [label="edge-router\n(Gateway)", shape=diamond, fillcolor=gray];
+    
+    // Connections
+    attacker -> edge_router [label="Attack Path", color=red, style=dashed];
+    soc_analyst -> edge_router [label="Monitor", color=blue];
+    edge_router -> webserver [label="HTTP"];
+    webserver -> firewall [style=dotted];
+    firewall -> database [label="DB"];
+    soc_analyst -> firewall [label="SSH", color=blue, style=dashed];
+}

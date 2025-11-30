@@ -1,0 +1,18 @@
+---
+# Common configuration for all hosts
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install common packages
+  apt:
+    name:
+      - vim
+      - curl
+      - wget
+      - net-tools
+      - dnsutils
+      - less
+    state: present

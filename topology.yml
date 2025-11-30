@@ -1,0 +1,82 @@
+# Red Team vs Blue Team Training Topology
+# Simulates a corporate network under attack
+
+hosts:
+  # Red Team - Attacker
+  - name: attacker
+    base_box:
+      image: kali
+      mgmt_user: kali
+    flavor: standard.small
+    network:
+      - network: external-net
+        ip: 10.0.0.100
+
+  # Blue Team - SOC Analyst
+  - name: soc-analyst
+    base_box:
+      image: debian-11-man
+      mgmt_user: debian
+    flavor: standard.small
+    network:
+      - network: soc-net
+        ip: 172.16.0.10
+
+  # Target - Web Server
+  - name: webserver
+    base_box:
+      image: debian-11-man
+      mgmt_user: debian
+    flavor: standard.small
+    network:
+      - network: dmz-net
+        ip: 192.168.1.10
+
+  # Target - Database Server
+  - name: database
+    base_box:
+      image: debian-11-man
+      mgmt_user: debian
+    flavor: standard.small
+    network:
+      - network: internal-net
+        ip: 192.168.2.20
+
+  # Blue Team - Firewall/IDS
+  - name: firewall
+    base_box:
+      image: debian-11-man
+      mgmt_user: debian
+    flavor: standard.small
+    network:
+      - network: dmz-net
+        ip: 192.168.1.254
+      - network: internal-net
+        ip: 192.168.2.1
+
+routers:
+  - name: edge-router
+    base_box:
+      image: debian-11-man
+      mgmt_user: debian
+    flavor: standard.small
+    network:
+      - network: external-net
+        ip: 10.0.0.1
+      - network: soc-net
+        ip: 172.16.0.1
+      - network: dmz-net
+        ip: 192.168.1.1
+
+networks:
+  - name: external-net
+    cidr: 10.0.0.0/24
+
+  - name: soc-net
+    cidr: 172.16.0.0/24
+
+  - name: dmz-net
+    cidr: 192.168.1.0/24
+
+  - name: internal-net
+    cidr: 192.168.2.0/24

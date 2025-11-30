@@ -1,0 +1,75 @@
+---
+# Firewall/IDS configuration
+
+- name: Install IDS tools
+  apt:
+    name:
+      - tcpdump
+      - iptables
+      - rsyslog
+    state: present
+
+- name: Enable IP forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Create IDS monitoring script
+  copy:
+    dest: /opt/ids_monitor.sh
+    content: |
+      #!/bin/bash
+      # Simple IDS Monitor
+      LOG_FILE="/var/log/ids_alerts.log"
+      
+      echo "IDS Monitor Started" >> $LOG_FILE
+      
+      tcpdump -i any -n 'tcp[tcpflags] & (tcp-syn) != 0' -l 2>/dev/null | while read line; do
+        # Detect port scans (many SYN packets)
+        echo "$(date '+%Y-%m-%d %H:%M:%S') [SCAN] $line" >> $LOG_FILE
+      done
+    mode: '0755'
+
+- name: Create alert viewer script
+  copy:
+    dest: /opt/view_alerts.sh
+    content: |
+      #!/bin/bash
+      echo "=== IDS ALERTS ==="
+      tail -f /var/log/ids_alerts.log
+    mode: '0755'
+
+- name: Configure logging
+  copy:
+    dest: /etc/rsyslog.d/50-ids.conf
+    content: |
+      # IDS logging configuration
+      local0.* /var/log/ids_alerts.log
+    mode: '0644'
+  notify: restart rsyslog
+
+- name: Set firewall MOTD
+  copy:
+    dest: /etc/motd
+    content: |
+      ============================================
+      🛡️ BLUE TEAM - FIREWALL/IDS 🛡️
+      ============================================
+      
+      Monitoring Scripts:
+      - /opt/ids_monitor.sh - Start IDS
+      - /opt/view_alerts.sh - View alerts
+      
+      Logs:
+      - /var/log/ids_alerts.log
+      
+      ============================================
+    mode: '0644'
+
+handlers:
+  - name: restart rsyslog
+    service:
+      name: rsyslog
+      state: restarted

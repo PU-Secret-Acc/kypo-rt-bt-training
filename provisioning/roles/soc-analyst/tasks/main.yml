@@ -1,0 +1,70 @@
+---
+# SOC Analyst workstation configuration
+
+- name: Install monitoring tools
+  apt:
+    name:
+      - tcpdump
+      - tshark
+      - nmap
+      - netcat-openbsd
+    state: present
+
+- name: Create monitoring directory
+  file:
+    path: /opt/monitoring
+    state: directory
+    mode: '0755'
+
+- name: Create monitoring script
+  copy:
+    dest: /opt/monitoring/watch.sh
+    content: |
+      #!/bin/bash
+      # SOC Monitoring Script
+      echo "Starting network monitor..."
+      echo "Logging to /var/log/soc_monitor.log"
+      tcpdump -i eth0 -n 'not port 22' -l | while read line; do
+        echo "$(date '+%Y-%m-%d %H:%M:%S') $line" >> /var/log/soc_monitor.log
+      done
+    mode: '0755'
+
+- name: Set SOC MOTD
+  copy:
+    dest: /etc/motd
+    content: |
+      ============================================
+      🔵 BLUE TEAM - SOC ANALYST WORKSTATION 🔵
+      ============================================
+      
+      Your mission:
+      1. Monitor network traffic
+      2. Detect attack attempts
+      3. Document evidence of compromise
+      4. Identify attack vectors
+      
+      Monitoring tools: /opt/monitoring
+      Logs: /var/log/soc_monitor.log
+      
+      Stay vigilant, defender!
+      ============================================
+    mode: '0644'
+
+- name: Configure SSH for accessing other servers
+  copy:
+    dest: /home/debian/.ssh/config
+    content: |
+      Host webserver
+        HostName 192.168.1.10
+        User debian
+      
+      Host firewall
+        HostName 192.168.1.254
+        User debian
+      
+      Host database
+        HostName 192.168.2.20
+        User debian
+    mode: '0600'
+    owner: debian
+    group: debian
